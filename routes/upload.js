@@ -3,7 +3,6 @@ var router = express.Router();
 var multer = require('multer');
 var path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-// const Database = require('better-sqlite3');
 var fs = require('fs');
 router.get('/', function (req, res,) {
     res.json({ message: 'hello world1!' });
