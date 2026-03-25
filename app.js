@@ -5,10 +5,10 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users/users');
-var dishesRouter = require('./routes/dishes/dishes');
-var cartRouter = require('./routes/cart/cart');
+// var dishesRouter = require('./routes/dishes/dishes');
+// var cartRouter = require('./routes/cart/cart');
+// var uploadRouter = require('./routes/upload');
 // var mealPlansRouter = require('./routes/meal_plans/index');
-var uploadRouter = require('./routes/upload');
 var app = express();
 
 
@@ -20,8 +20,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/cart', cartRouter);
-app.use('/api/dishes', dishesRouter);
+// app.use('/api/cart', cartRouter);
+// app.use('/api/dishes', dishesRouter);
+// app.use('/api/upload', uploadRouter);
 // app.use('/api/plans', mealPlansRouter);
-app.use('/api/upload', uploadRouter);
 module.exports = app;
