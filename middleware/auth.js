@@ -2,18 +2,9 @@
 const jwt = require('jsonwebtoken');
 // 引入 better-sqlite3
 // const Database = require('better-sqlite3');
-const initSqlJs = require('sql.js');
-let db = null;
-
-// 初始化数据库
-const initDatabase = async () => {
-    const SQL = await initSqlJs();
-    db = new SQL.Database();
-};
-
-initDatabase().catch(err => {
-    console.error('数据库初始化失败:', err);
-});
+const sqlite3 = require('sqlite3').verbose();
+// 连接你的数据库文件（路径：项目根目录的 my_good_db.db）
+const db = new sqlite3.Database('/tmp/my_good_db.db');
 module.exports = (req, res, next) => {
     try {
         // 适合 sqlite3
@@ -28,21 +19,18 @@ module.exports = (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const openid = decoded.openid;
 
-        // 3. sql.js 同步查询
-        if (!db) {
-            return res.status(503).json({ code: 503, message: '数据库未初始化' });
-        }
+        // 3. sqlite3 异步查询（重点！！！）
         const sql = 'SELECT * FROM wechat_user WHERE openid = ? AND token = ?';
-        const user = db.get(sql, [openid, token]);
-        
-        if (!user) {
-            return res.status(401).json({ code: 401, message: 'token无效或已过期' });
-        }
+        db.get(sql, [openid, token], (err, user) => {
+            if (err || !user) {
+                return res.status(401).json({ code: 401, message: 'token无效或已过期' });
+            }
 
-        // 4. 挂载用户信息 → 这里才能拿到！
-        req.user = user;
-        console.log('查询参数 user1:', user);
-        next();
+            // 4. 挂载用户信息 → 这里才能拿到！
+            req.user = user;
+            console.log('查询参数 user1:', user);
+            next();
+        });
     } catch (err) {
         return res.status(401).json({ code: 401, message: 'token验证失败' });
     }
