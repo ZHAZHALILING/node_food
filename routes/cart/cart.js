@@ -4,9 +4,10 @@ var router = express.Router();
 // 先引入 auth 中间件
 const auth = require('../../middleware/auth');
 // 引入 better-sqlite3
-const Database = require('better-sqlite3');
+// const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 // 连接你的数据库文件（路径：项目根目录的 my_good_db.db）
-const db = new Database('./my_good_db.db');
+const db = new sqlite3.Database('/tmp/my_good_db.db');
 // 2. 初始化购物车表（如果还没建）
 const initCartTable = () => {
   db.exec(`

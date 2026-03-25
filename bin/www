@@ -15,7 +15,7 @@ const WX_CONFIG = {
   appid: process.env.WX_APPID,   // 读取 .env 中的 WX_APPID
   secret: process.env.WX_SECRET  // 读取 .env 中的 WX_SECRET
 };
-var port = normalizePort(process.env.PORT || '3002');
+var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**

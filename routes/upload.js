@@ -2,13 +2,14 @@ var express = require('express');
 var router = express.Router();
 var multer = require('multer');
 var path = require('path');
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
+// const Database = require('better-sqlite3');
 var fs = require('fs');
 router.get('/', function (req, res,) {
     res.json({ message: 'hello world1!' });
 });
 // 连接数据库
-const db = new Database('./my_good_db.db');
+const db = new sqlite3.Database('/tmp/my_good_db.db');
 
 // 配置上传目录
 const uploadDir = path.join(__dirname, '../public/uploads');
