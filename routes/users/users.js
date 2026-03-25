@@ -306,4 +306,9 @@ router.post('/logout', (req, res) => {
     }
 });
 
+
+router.get('/', function (req, res) {
+    res.json({ message: 'Express111222222' });
+});
+
 module.exports = router;
