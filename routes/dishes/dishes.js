@@ -3,12 +3,15 @@ var express = require('express');
 var router = express.Router();
 // 先引入 auth 中间件
 const auth = require('../../middleware/auth');
-const SQL = require('sql.js');
-// 创建内存数据库（sql.js 使用内存数据库）
-const db = new SQL.Database();
+const initSqlJs = require('sql.js');
+let db = null;
 
-// 初始化数据库表
-const initDatabase = () => {
+// 初始化数据库
+const initDatabase = async () => {
+    const SQL = await initSqlJs();
+    db = new SQL.Database();
+    
+    // 创建菜品表
     db.run(`
         CREATE TABLE IF NOT EXISTS dishes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +24,9 @@ const initDatabase = () => {
     `);
 };
 
-initDatabase();
+initDatabase().catch(err => {
+    console.error('数据库初始化失败:', err);
+});
 const baseUrl = process.env.BASE_URL;
 
 
@@ -34,6 +39,12 @@ router.post('/submit', auth,(req, res) => {
     return res.status(400).json({ code: 400, msg: '菜品名称不能为空' });
   }
   try {
+    if (!db) {
+      return res.status(503).json({
+        code: 503,
+        message: '数据库未初始化'
+      });
+    }
     // 插入数据库
     const result = db.run('INSERT INTO dishes (name, image_url, description) VALUES (?, ?, ?)', [name, imageUrl, description]);
     
@@ -61,6 +72,12 @@ router.post('/submit', auth,(req, res) => {
 /* 新增：查询所有菜品数据的接口 */
 router.get('/list', function (req, res) {
   try {
+    if (!db) {
+      return res.status(503).json({
+        code: 503,
+        message: '数据库未初始化'
+      });
+    }
     // 查询 dishes 表所有数据，按创建时间倒序排序
     const data = db.all('SELECT * FROM dishes ORDER BY create_time DESC');
 

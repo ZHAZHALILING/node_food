@@ -5,12 +5,15 @@ const axios = require('axios'); // 用于调用微信接口
 const crypto = require('crypto'); // 生成token
 const jwt = require('jsonwebtoken');
 
-const SQL = require('sql.js');
-// 创建内存数据库（sql.js 使用内存数据库）
-const db = new SQL.Database();
+const initSqlJs = require('sql.js');
+let db = null;
 
-// 初始化数据库表
-const initDatabase = () => {
+// 初始化数据库
+const initDatabase = async () => {
+    const SQL = await initSqlJs();
+    db = new SQL.Database();
+    
+    // 创建用户表
     db.run(`
         CREATE TABLE IF NOT EXISTS wechat_user (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +29,9 @@ const initDatabase = () => {
     `);
 };
 
-initDatabase();
+initDatabase().catch(err => {
+    console.error('数据库初始化失败:', err);
+});
 const baseUrl = process.env.BASE_URL;
 // 建议把密钥放到 .env 环境变量里，比如 JWT_SECRET=your_secret_key
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -106,6 +111,12 @@ router.post('/wechatLogin', async (req, res) => {
         
         // 查询用户是否存在
         try {
+            if (!db) {
+                return res.status(503).json({
+                    code: 503,
+                    message: '数据库未初始化'
+                });
+            }
             const findUser = db.get('SELECT * FROM wechat_user WHERE openid = ?', [openid]);
             
             if (findUser) {
@@ -164,6 +175,15 @@ router.get('/checkToken', (req, res) => {
         }
         // 1. 查询Token是否存在 + 未过期
         try {
+            if (!db) {
+                return res.status(503).json({
+                    code: 503,
+                    message: '数据库未初始化',
+                    data: {
+                        isValid: false
+                    }
+                });
+            }
             const findUser = db.get(`
                 SELECT id, openid, identity_type FROM wechat_user 
                 WHERE token = ? AND expire_time > datetime('now')
@@ -226,6 +246,12 @@ router.post('/logout', (req, res) => {
         
         // 查询用户并验证 token
         try {
+            if (!db) {
+                return res.status(503).json({
+                    code: 503,
+                    message: '数据库未初始化'
+                });
+            }
             const findUser = db.get(`
                 SELECT id, openid FROM wechat_user 
                 WHERE token = ? AND expire_time > datetime('now')

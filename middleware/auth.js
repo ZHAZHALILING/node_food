@@ -2,9 +2,18 @@
 const jwt = require('jsonwebtoken');
 // 引入 better-sqlite3
 // const Database = require('better-sqlite3');
-const SQL = require('sql.js');
-// 创建内存数据库（sql.js 使用内存数据库）
-const db = new SQL.Database();
+const initSqlJs = require('sql.js');
+let db = null;
+
+// 初始化数据库
+const initDatabase = async () => {
+    const SQL = await initSqlJs();
+    db = new SQL.Database();
+};
+
+initDatabase().catch(err => {
+    console.error('数据库初始化失败:', err);
+});
 module.exports = (req, res, next) => {
     try {
         // 适合 sqlite3
@@ -20,6 +29,9 @@ module.exports = (req, res, next) => {
         const openid = decoded.openid;
 
         // 3. sql.js 同步查询
+        if (!db) {
+            return res.status(503).json({ code: 503, message: '数据库未初始化' });
+        }
         const sql = 'SELECT * FROM wechat_user WHERE openid = ? AND token = ?';
         const user = db.get(sql, [openid, token]);
         

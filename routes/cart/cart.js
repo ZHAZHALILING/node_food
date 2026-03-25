@@ -4,12 +4,14 @@ var router = express.Router();
 // 先引入 auth 中间件
 const auth = require('../../middleware/auth');
 
-const SQL = require('sql.js');
-// 创建内存数据库（sql.js 使用内存数据库）
-const db = new SQL.Database();
+const initSqlJs = require('sql.js');
+let db = null;
 
-// 初始化数据库表
-const initDatabase = () => {
+// 初始化数据库
+const initDatabase = async () => {
+    const SQL = await initSqlJs();
+    db = new SQL.Database();
+    
     // 创建购物车表
     db.run(`
         CREATE TABLE IF NOT EXISTS cart (
@@ -48,7 +50,9 @@ const initDatabase = () => {
     `);
 };
 
-initDatabase();
+initDatabase().catch(err => {
+    console.error('数据库初始化失败:', err);
+});
 
 /* 添加购物车接口 */
 router.post('/addCart', auth,function (req, res) {
@@ -67,6 +71,12 @@ router.post('/addCart', auth,function (req, res) {
     
     // 查询是否已存在
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const exist = db.get(`
         SELECT id FROM cart
         WHERE user_id = ? AND dish_id = ? AND create_date = ?
@@ -118,6 +128,12 @@ router.get('/cartList', auth, function (req, res) {
 
     // 联表查询：购物车表 cart JOIN 菜品表 dishes
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const data = db.all(`
         SELECT 
           c.*,                -- 购物车所有字段
@@ -183,6 +199,12 @@ router.delete('/cartRemove', auth, function (req, res) {
 
     // 执行删除（只删除当前用户的购物车项，保证安全）
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const result = db.run(`
         DELETE FROM cart 
         WHERE user_id = ? AND id = ?
@@ -227,6 +249,12 @@ router.delete('/cartClear', auth,function (req, res) {
     }
 
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const result = db.run(`
         DELETE FROM cart WHERE user_id = ?
       `, [user_id]);
@@ -286,6 +314,12 @@ router.post('/cartSubmit', auth,function (req, res) {
 
     // 查询当前用户购物车（关联 dishes 表获取图片和描述）
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const cartList = db.all(cartQuery, queryParams);
 
       if (cartList.length === 0) {
@@ -361,6 +395,12 @@ router.get('/cartSubmitList', function (req, res) {
   try {
     // 1. 查询提交主记录（关联用户信息，可选）
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const submitList = db.all(`
         SELECT cs.*, wu.openid 
         FROM cart_submit cs
@@ -429,6 +469,12 @@ router.post('/resetCart', (req, res) => {
     const date = req.body.date || new Date().toISOString().split('T')[0];
 
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const result = db.run(`DELETE FROM cart WHERE create_date = ?`, [date]);
 
       res.json({
@@ -463,6 +509,12 @@ router.get('/getSubmitHistory', auth, (req, res) => {
 
     // 1. 查询【提交主记录】（一次提交一条）
     try {
+      if (!db) {
+        return res.status(503).json({
+          code: 503,
+          message: '数据库未初始化'
+        });
+      }
       const submitList = db.all(`
         SELECT 
           id AS submit_id,
