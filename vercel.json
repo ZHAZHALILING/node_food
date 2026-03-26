@@ -1,7 +1,7 @@
 {
-  "functions": {
-    "**/*.js": {
-      "includeFiles": "node_modules/node-sqlite3-wasm/dist/**/*.wasm"
+  "build": {
+    "env": {
+      "NODE_VERSION": "18.x"
     }
   }
 }
