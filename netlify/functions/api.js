@@ -8,6 +8,6 @@ const app = express();
 const yourApp = require('../../app.js');
 
 // 把你的 app 挂载到 Netlify Functions 的路径下
-app.use('/.netlify/functions/api', yourApp);
+app.use('/', yourApp);
 
 module.exports.handler = serverless(app);
