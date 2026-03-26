@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 // const Database = require('better-sqlite3');
 const sqlite3 = require('sqlite3').verbose();
 // 连接你的数据库文件（路径：项目根目录的 my_good_db.db）
-const db = new sqlite3.Database('./my_good_db.db');
+const db = new sqlite3.Database('/tmp/my_good_db.db');
 const baseUrl = process.env.BASE_URL;
 
 // 建议把密钥放到 .env 环境变量里，比如 JWT_SECRET=your_secret_key
