@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "**/*.js": {
+      "includeFiles": "node_modules/node-sqlite3-wasm/dist/**/*.wasm"
+    }
+  }
+}
