@@ -3,9 +3,9 @@ var express = require('express');
 var router = express.Router();
 // 先引入 auth 中间件
 const auth = require('../../middleware/auth');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('node-sqlite3-wasm');
 // 连接你的数据库文件（路径：项目根目录的 my_good_db.db）
-const db = new sqlite3.Database('/tmp/my_good_db.db');
+const db = new sqlite3.Database('./my_good_db.db');
 const baseUrl = process.env.BASE_URL;
 
 // 2. 初始化菜品表（如果还没建）
@@ -20,7 +20,7 @@ const initDishTable = () => {
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
   )
-`, (err) => {
+`, [], (err) => {
     if (err) {
       console.error('创建菜品表失败:', err);
     }

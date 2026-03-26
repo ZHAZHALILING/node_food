@@ -4,9 +4,9 @@ var router = express.Router();
 // 先引入 auth 中间件
 const auth = require('../../middleware/auth');
 
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('node-sqlite3-wasm');
 // 连接你的数据库文件（路径：项目根目录的 my_good_db.db）
-const db = new sqlite3.Database('/tmp/my_good_db.db');
+const db = new sqlite3.Database('./my_good_db.db');
 // 2. 初始化购物车表（如果还没建）
 const initCartTable = () => {
   db.run(`
@@ -21,7 +21,7 @@ const initCartTable = () => {
     FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES wechat_user(id) ON DELETE CASCADE
   );
-`, (err) => {
+`, [], (err) => {
     if (err) {
       console.error('创建购物车表失败:', err);
     }
@@ -249,7 +249,7 @@ const initCartSubmitTable = () => {
     status TEXT DEFAULT 'pending',
     remark TEXT
   );
-`, (err) => {
+`, [], (err) => {
     if (err) {
       console.error('创建购物车提交表失败:', err);
     }
@@ -265,7 +265,7 @@ const initCartSubmitTable = () => {
       dish_name TEXT ,         -- 菜品名称（冗余存储，避免菜品删除后丢失）
       FOREIGN KEY (submit_id) REFERENCES cart_submit(id) ON DELETE CASCADE
     );
-  `, (err) => {
+  `, [], (err) => {
       if (err) {
         console.error('创建购物车提交明细表失败:', err);
       }

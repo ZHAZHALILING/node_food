@@ -2,9 +2,9 @@
 const jwt = require('jsonwebtoken');
 // 引入 better-sqlite3
 // const Database = require('better-sqlite3');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('node-sqlite3-wasm');
 // 连接你的数据库文件（路径：项目根目录的 my_good_db.db）
-const db = new sqlite3.Database('/tmp/my_good_db.db');
+const db = new sqlite3.Database('./my_good_db.db');
 module.exports = (req, res, next) => {
     try {
         // 适合 sqlite3
